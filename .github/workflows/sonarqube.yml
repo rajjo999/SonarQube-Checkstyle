@@ -1,0 +1,33 @@
+name: Sonarqube Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sonarqube:
+    name: Sonarqube Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Sonarqube Scanner
+        uses: SonarSource/sonarqube-scan-action@v1
+        with:
+          sonar-token: fb4208a8e48b28649f1bb852360dfba10fcad7e0
+          sonar-project-base-dir: ./
+          sonar-project-key: Java-SonarQube-GHA
+          sonar-host-url: 'http://127.0.0.1:8084/'
+
+      - name: Quality Gate Status
+        env:
+          SONAR_TOKEN: fb4208a8e48b28649f1bb852360dfba10fcad7e0
+          SONAR_HOST_URL: 'http://127.0.0.1:8084/'
+        run: |
+          status=$(curl -s -u "${SONAR_TOKEN}": "${SONAR_HOST_URL}"/api/qualitygates/project_status?projectKey=${{ env.SONAR_PROJECT_KEY }} | jq -r '.projectStatus.status')
+          if [ "$status" != "OK" ]; then exit 1; fi
+
+
+
